@@ -1,11 +1,14 @@
 <?php 
-    session_start();
+    // session_start();
     require("function.php");
-    if (isset($_POST['signup']) && !check_parameter($_POST['username'],$_POST['password'],$_POST['role'],
-            $_POST['fullname'],$_POST['email'],$_POST['phone']) ){
-        
-        if (no_symbol_validation($_POST['username'])){
-            die("Username must not contain special characters !");
+    if (isset($_POST['signup'])  ){
+        if (check_parameter($_POST['username'],$_POST['password'],$_POST['role'],
+        $_POST['fullname'],$_POST['email'],$_POST['phone'])){
+            die("Please enter all the fields !");
+
+        }
+        if (no_symbol_validation($username)){
+            die("Username must contain only letters,numbers and underscore !");
         }
         if (no_symbol_validation($_POST['fullname'])){
             die("Full Name must not contain special characters !");
@@ -13,14 +16,14 @@
         if (!email_validation($_POST['email'])){
             die("Invalid email !");
         }
-        if (number_validation($_POST['phone'])){
+        if (! number_validation($_POST['phone'])){
             die("Phone number must contain only number 0-9 and length must be less or equal to 10!");
         }
         echo "<script>alert('Sign up successfully!')</script>";
         
         // add the credentials to db 
         connect_db();
-        add_to_db($_POST['username'],$_POST['password'],$_POST['role'],$_POST['fullname'],$_POST['email'],$_POST['phone']);
+        add_record($_POST['username'],$_POST['password'],$_POST['role'],$_POST['fullname'],$_POST['email'],$_POST['phone']);
         disconnect_db();
         header('location:login.php');
     }

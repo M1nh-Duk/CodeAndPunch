@@ -1,9 +1,21 @@
 <?php
     session_start();
     require('function.php');
-    if (isset($_POST['login']) && ! check_parameter($_POST['username'],$_POST['password'])){
-        
-    }
+    if (isset($_POST['login']) ){
+        $username = $_POST['username'];
+        $pass = $_POST['password'];
+        if ( check_parameter($username,$pass)){
+            die("Please fill in all the fields !");
+        }
+        if (no_symbol_validation($username) ){
+            die("Username must contain only letters,numbers and underscore !");
+        }
+        connect_db();
+        if (check_login($username,$pass)){
+            header('location:home.php');
+        }
+        disconnect_db();
+    }  
 ?>
 <!DOCTYPE html>
 <html lang="en">

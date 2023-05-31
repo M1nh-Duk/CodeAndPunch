@@ -34,10 +34,22 @@ body,h1,h2,h3,h4,h5 {font-family: "Poppins", sans-serif}
 body {font-size:16px;}
 .w3-half img{margin-bottom:-6px;margin-top:16px;opacity:0.8;cursor:pointer}
 .w3-half img:hover{opacity:1}
-ul {list-style: none;padding: 0;margin: 0;}
-li {display: flex;align-items: center;margin-bottom: 50px;}
-li span{font-weight: bold;margin-right: 10px;width: 300px;}
 .round-button {background-color: green;color: white;border: none;border-radius: 50%;padding: 10px 20px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;cursor: pointer;}
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
 
 </style>
 </head>
@@ -66,42 +78,51 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
 
   <!-- Header -->
   <div class="w3-container" style="margin-top:20px" id="showcase">
-    <h1 class="w3-jumbo"><b>Welcome aboard, </b></h1>
-    <h1 class="w3-xxxlarge w3-text-red"><b><?php echo $username; ?></b></h1>
+    <h1 class="w3-jumbo"><b>View users</b></h1>
     <hr style="width:120px;border:5px solid red" class="w3-round">
   </div>
 <br>
  
   <div>
-    <h3><b>Your information:</b></h3>
+    <h3><b>User Table</b></h3>
     <br><br>
-    <ul >
-        <li>
-            <span>Username:</span>
-            <span><?php echo $username;?></span>
-        </li>
-        <li>
-            <span>Password:</span>
-            <span><?php echo $_SESSION['password'];?></span>
-        </li>
-        <li>
-            <span>Full name:</span>
-            <span><?php echo $fullname;?></span>
-        </li>
-        <li>
-            <span>Role:</span>
-            <span><?php echo $role;?>
-        </li>
-        <li>
-            <span>Email:</span>
-            <span><?php echo $email;?></span>
-        </li>
-        <li>
-            <span>Phone Number:</span>
-            <span><?php echo $phone;?></span>
-        </li>
-    </ul>
-    <a href="edit.php" class="round-button">Edit</a>
+    <table>
+        <tr>
+            <th>Full name</th> 
+            <th>Role</th> 
+            <th>Action</th>     
+        </tr>
+        <?php
+            connect_db();
+            $result = get_all_users();
+            disconnect_db();
+        ?>
+            <?php while ($row = mysqli_fetch_assoc($result))://print all users and use javascript to send the clicked student to next page ?>   
+            <?php
+                $row['role'] = ($row['role'] == 1) ? 'Teacher' : 'Student';
+            ?>
+        <tr>
+            <td> <?php echo $row['full_name'] ?></td>
+            <td> <?php echo $row['role'] ?></td>
+            <td>
+                    <form action="view_user.php" method="POST">
+                        <input type="hidden" name="view_id" value="<?php echo $row['user_id']; ?>">
+                    <button  type="submit"> View </button> 
+                    </form>
+                <?php  if ($role == 'Teacher' && $row['role'] == 'Student'):// only teacher can edit student but not other teacher?>
+                    <form action="edit_student.php" method="POST">
+                        <input type="hidden" name="edit_id" value="<?php $_SESSION['edit_id'] = $row['user_id']; ?>">
+                    <button  type="submit"> Edit </button> 
+                    </form>
+                
+                <?php endif; ?>
+
+            </td>
+        </tr>
+        <?php endwhile; ?>
+
+        
+    </table>
 
   </div>
   
@@ -127,13 +148,18 @@ function w3_close() {
   document.getElementById("myOverlay").style.display = "none";
 }
 
-// Modal Image Gallery
-function onClick(element) {
-  document.getElementById("img01").src = element.src;
-  document.getElementById("modal01").style.display = "block";
-  var captionText = document.getElementById("caption");
-  captionText.innerHTML = element.alt;
-}
+function redirectToEdit() {
+        // Redirect to the desired page
+        window.location.href = "edit_student.php";
+    }
+
+// Edit student
+function editStudent(username) {
+        // Perform desired actions with the student ID
+        // You can send the student ID to the server via AJAX for further processing
+        console.log("Edit student with username: " + username);
+        // Additional logic can be added here, such as redirecting to an edit page
+    }
 </script>
 
 </body>
