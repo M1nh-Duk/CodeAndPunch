@@ -1,6 +1,7 @@
 <?php
 
 global $conn;
+global $student_id;
 function connect_db() {
     global $conn;
     $conn = mysqli_connect("localhost", "root", "", "codeandpunch");
@@ -144,6 +145,166 @@ function get_all_users(){
     return $result;
 }
 
+function check_dupl_username($str){  // return true if username duplicated, false if no duplicate found
+    $result = get_all_users();
+    while ($row = mysqli_fetch_assoc($result)){
+        if ($row['username'] == $str){
+            return true;
+        }
+    }
+    return false;
+
+}
+
+// homework
+function get_all_homework(){
+    global $conn;
+    $query = "SELECT * FROM homework";
+    $result = mysqli_query($conn, $query);
+    return $result;
+}
+
+function get_homework_information($id){
+    global $conn;
+    $query = "SELECT * FROM homework WHERE homework_id = ?";
+    try{
+        $preparedStatement = $conn->prepare($query);
+        $preparedStatement->bind_param('i',$id);
+        $preparedStatement->execute();
+    }
+    catch(Exception $e ){
+        echo "<script>alert('Error connecting to database')</script>";
+        exit();
+    }
+    $result = $preparedStatement->get_result();
+    if (mysqli_num_rows($result) <= 0) {
+        $message = "No result found !";
+        echo "<script type='text/javascript'>alert('$message');</script>";
+        
+    } else {
+        
+        $row = $result->fetch_assoc();
+        return $row;
+}
+}
+function add_homework($tittle, $description, $file_name, $date){
+    global $conn;
+    $current_submission = 0;
+    $query = "INSERT INTO homework (tittle, description, file_name, date, current_submission) VALUES (?,?,?,?,?)";
+    $preparedStatement = $conn->prepare($query);
+    $preparedStatement->bind_param('ssssi',$tittle, $description, $file_name, $date,$current_submission);
+    if ($preparedStatement->execute()){
+        return true;
+    }
+    return false;
+    
+}
+
+function update_homework($homework_id ,$tittle, $description, $file_name, $date){
+    global $conn;
+    $query = "UPDATE homework 
+    SET tittle = ?, description = ?, file_name = ? , date = ?  
+    WHERE homework_id = ?;";
+    $preparedStatement = $conn->prepare($query);
+    $preparedStatement->bind_param('ssssii',$tittle, $description, $file_name, $date,$homework_id);
+    if ($preparedStatement->execute()){
+        return true;
+    }
+    return false;
+}
+function delete_homework($homework_id){
+    global $conn;
+    $query = "DELETE FROM `homework` WHERE homework_id = ?";
+    $preparedStatement = $conn->prepare($query);
+    $preparedStatement->bind_param('i',$homework_id);
+    if ($preparedStatement->execute()){
+        return true;
+    }
+    return false;
+}
+// FILE
+
+function validateFile()
+{
+    $allowedMimeTypes = ['text/plain','application/msword','application/pdf'];
+    $allowedExtensions = ['txt','doc','pdf'];
+    $maxFileSize = 170000;
+
+    $file = $_FILES['file_name'];
+    $tempFile = $file['tmp_name'];
+
+    // Check if file was uploaded successfully
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        echo "Error uploading file.";
+        return false;
+    }
+
+    // Check file MIME type
+    $fileInfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mimeType = finfo_file($fileInfo, $tempFile);
+    echo $mimeType;
+    finfo_close($fileInfo);
+    if (!in_array($mimeType, $allowedMimeTypes)) {
+        echo "Invalid file type. Only text,word,pdf files are allowed.";
+        return false;
+    }
+
+    // Check file extension
+    $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($fileExtension, $allowedExtensions)) {
+        echo "Invalid file extension. Only TXT files are allowed.";
+        return false;
+    }
+
+    // Check file size
+    if ($file['size'] > $maxFileSize) {
+        echo "File size exceeds the limit.";
+        return false;
+    }
+
+    return true;
+}
+
+function uploadFile($targetDir)
+{
+    if ($_FILES['file_name']['name'] != "") {
+        // Where the file is going to be stored
+        $fileName = $_FILES['file_name']['name'];
+        $tempFile = $_FILES['file_name']['tmp_name'];
+        $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        
+        // Sanitized file name
+        $temp = basename($fileName);
+        $pattern = '/[^A-Za-z0-9_.-]/';
+        $sanitizedFileName = preg_replace($pattern, '', $temp);
+
+        // Generate a unique file name
+	  
+        $uniqueName = uniqid() . '_' . $sanitizedFileName;
+        $targetFile = $targetDir . $uniqueName;
+
+        // Check if file already exists
+        if (file_exists($targetFile)) {
+            echo "<script>alert('Sorry, a file with the same name already exists.')</script>";
+            return null;
+        } elseif (!validateFile()) {
+            echo "<script>alert('Invalid file.')</script>";
+            return null; 
+        } else {
+            // Move uploaded file to the desired directory
+            if (move_uploaded_file($tempFile, $targetFile)) {
+                echo "<script>alert('File uploaded successfully !')</script>";
+                return $targetFile;
+            } else {
+                echo "<script>alert('Error uploading file.')</script>";
+                return null;
+            }
+        }
+    } else {
+        echo "<script>alert('No file selected.')</script>";
+        return null;
+    }
+}
 
 
 ?>

@@ -15,6 +15,7 @@
   else {
       $role = "Student";
   }
+  $_SESSION['role'] = $role;
   $fullname = $row['full_name'];
   $email = $row['email'];
   $phone = $row['phone_num'];
@@ -53,7 +54,7 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
     <a href="home.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Home</a> 
     <a href="edit.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Edit information</a>
     <a href="view.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">View user</a> 
-    <a href="#" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Homework</a> 
+    <a href="homework.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Homework</a> 
     <a href="#" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Game</a>
     <br><br><br><br><br><br><br><br>
     <a href="logout.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Sign Out</a> 
@@ -82,19 +83,19 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
         </li>
         <li>
             <span>Password:</span>
-            <span><?php echo $_SESSION['password'];?></span>
+            <span><?php echo htmlspecialchars($_SESSION['password']);?></span>
         </li>
         <li>
             <span>Full name:</span>
-            <span><?php echo $fullname;?></span>
+            <span><?php echo htmlspecialchars($fullname);?></span>
         </li>
         <li>
             <span>Role:</span>
-            <span><?php echo $role;?>
+            <span><?php echo htmlspecialchars($role);?>
         </li>
         <li>
             <span>Email:</span>
-            <span><?php echo $email;?></span>
+            <span><?php echo htmlspecialchars($email);?></span>
         </li>
         <li>
             <span>Phone Number:</span>
@@ -115,26 +116,7 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
 </footer>
 
 
-<script>
-// Script to open and close sidebar
-function w3_open() {
-  document.getElementById("mySidebar").style.display = "block";
-  document.getElementById("myOverlay").style.display = "block";
-}
- 
-function w3_close() {
-  document.getElementById("mySidebar").style.display = "none";
-  document.getElementById("myOverlay").style.display = "none";
-}
 
-// Modal Image Gallery
-function onClick(element) {
-  document.getElementById("img01").src = element.src;
-  document.getElementById("modal01").style.display = "block";
-  var captionText = document.getElementById("caption");
-  captionText.innerHTML = element.alt;
-}
-</script>
 
 </body>
 </html>

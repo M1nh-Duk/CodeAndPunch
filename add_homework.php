@@ -19,36 +19,29 @@
   else {
       $role = "Student";
   }
-  $fullname = $row['full_name'];
-  $email = $row['email'];
-  $phone = $row['phone_num'];
+  
 
-  if (isset($_POST['add'])  ){
-    if (check_parameter($_POST['username'],$_POST['password'],$_POST['fullname'],$_POST['email'],$_POST['phone'])){
-        die("Please enter all the fields !");
+  if (isset($_POST['add_homework'])  ){
+    if (check_parameter($_POST['tittle'],$_POST['date'])){
+        die("Please enter all the required fields !");
 
     }
-    if (check_dupl_username($_POST['username'])){
-      die("Duplicated username !");
-  }
-    if (no_symbol_validation($_POST['username'])){
-        die("Username must contain only letters,numbers and underscore !");
+    try{
+        $date=date('Y-m-d', strtotime($_POST['date']));    //convert date to desired format YYYY-MM-DD
     }
-    if (no_symbol_validation($_POST['fullname'])){
-        die("Full Name must not contain special characters !");
+    catch (Exception $e){
+        die("Invalid date !");
     }
-    if (!email_validation($_POST['email'])){
-        die("Invalid email !");
-    }
-    if (! number_validation($_POST['phone'])){
-        die("Phone number must contain only number 0-9 and length must be less or equal to 10!");
-    }
-    echo "<script>alert('Add student successfully!')</script>";
     
-    // add the credentials to db 
-    add_record($_POST['username'],$_POST['password'],0,$_POST['fullname'],$_POST['email'],$_POST['phone']);
+    
+    $filename = uploadFile("uploads/homework/");
+    if ($filename == null){
+        die ("Please upload valid file");
+    }
+    // add homework to db 
+    add_homework($_POST['tittle'],$_POST['description'],$filename,$date);
     disconnect_db();
-    header('location:home.php');
+    header('location:homework.php');
 }
   disconnect_db();
   ?>
@@ -97,33 +90,31 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
 
   <!-- Header -->
   <div class="w3-container" style="margin-top:20px" id="showcase">
-    <h1 class="w3-jumbo"><b>Add new student </b></h1>
+    <h1 class="w3-jumbo"><b>Add new homework </b></h1>
     <hr style="width:120px;border:5px solid red" class="w3-round">
   </div>
 <br>
  
   <div>
-    <h3><b>Student's information</b></h3>
+    <h3><b>Homework information</b></h3>
     <br><br>
-    <form action="add_student.php" method="POST">
-        <label for="username">Username:</label><br>
-        <input type="text" id="username" name="username" required><br>
+    <form action="add_homework.php" method="POST" enctype="multipart/form-data">
+        <label for="username">Tittle:</label><br>
+        <input type="text" name="tittle" required><br>
 
-        <p>Role: Student </p>
 
-        <label for="password">Password:</label><br>
-        <input type="password" id="password" name="password" required><br>
+        <label for="description">Description:</label><br>
+        <textarea name="description" rows="3" cols="20"></textarea>
 
-        <label for="fullname">Full name</label>:</label><br>
-        <input type="text" id="fullname" name="fullname" required><br>
+        <br>
+        <label for="date">Due date</label>:</label><br>
+        <input type="date" name="date" required><br>
 
-        <label for="email">Email:</label><br>
-        <input type="email" id="email" name="email" required><br>
+        <label for="file_name">File:</label></label><br>
+        <input type="file" name="file_name" required>
 
-        <label for="phone">Phone number:</label><br>
-        <input type="text" id="phone" name="phone" required>
-        <br><br>
-        <input  type="submit" value="Add" name="add"><br>
+        <br><br><br>
+        <input type="submit" name="add_homework">
     </form>
    
 
@@ -139,26 +130,7 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
 </footer>
 
 
-<script>
-// Script to open and close sidebar
-function w3_open() {
-  document.getElementById("mySidebar").style.display = "block";
-  document.getElementById("myOverlay").style.display = "block";
-}
- 
-function w3_close() {
-  document.getElementById("mySidebar").style.display = "none";
-  document.getElementById("myOverlay").style.display = "none";
-}
 
-// Modal Image Gallery
-function onClick(element) {
-  document.getElementById("img01").src = element.src;
-  document.getElementById("modal01").style.display = "block";
-  var captionText = document.getElementById("caption");
-  captionText.innerHTML = element.alt;
-}
-</script>
 
 </body>
 </html>

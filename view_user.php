@@ -93,7 +93,7 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
 
             <li>
                 <span>Full name:</span>
-                <span><?php echo $fullname; ?></span>
+                <span><?php echo htmlspecialchars($fullname); ?></span>
             </li>
             <li>
                 <span>Role:</span>
@@ -101,7 +101,7 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
             </li>
             <li>
                 <span>Email:</span>
-                <span><?php echo $email; ?></span>
+                <span><?php echo htmlspecialchars($email); ?></span>
             </li>
             <li>
                 <span>Phone Number:</span>

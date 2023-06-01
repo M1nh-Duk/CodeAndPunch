@@ -6,10 +6,6 @@
     header('Location: login.php');
     exit;
   }
-  if (!isset($_SESSION['role']) ||  $_SESSION['role'] == 'Student'){
-    header('Location: home.php');
-    exit;
-  }
   connect_db();
   $row = get_information($_SESSION['user_id']);
   $username = $row['username'];
@@ -19,37 +15,11 @@
   else {
       $role = "Student";
   }
+  $_SESSION['role'] = $role;
   $fullname = $row['full_name'];
   $email = $row['email'];
   $phone = $row['phone_num'];
 
-  if (isset($_POST['add'])  ){
-    if (check_parameter($_POST['username'],$_POST['password'],$_POST['fullname'],$_POST['email'],$_POST['phone'])){
-        die("Please enter all the fields !");
-
-    }
-    if (check_dupl_username($_POST['username'])){
-      die("Duplicated username !");
-  }
-    if (no_symbol_validation($_POST['username'])){
-        die("Username must contain only letters,numbers and underscore !");
-    }
-    if (no_symbol_validation($_POST['fullname'])){
-        die("Full Name must not contain special characters !");
-    }
-    if (!email_validation($_POST['email'])){
-        die("Invalid email !");
-    }
-    if (! number_validation($_POST['phone'])){
-        die("Phone number must contain only number 0-9 and length must be less or equal to 10!");
-    }
-    echo "<script>alert('Add student successfully!')</script>";
-    
-    // add the credentials to db 
-    add_record($_POST['username'],$_POST['password'],0,$_POST['fullname'],$_POST['email'],$_POST['phone']);
-    disconnect_db();
-    header('location:home.php');
-}
   disconnect_db();
   ?>
 <!DOCTYPE html>
@@ -69,6 +39,22 @@ ul {list-style: none;padding: 0;margin: 0;}
 li {display: flex;align-items: center;margin-bottom: 50px;}
 li span{font-weight: bold;margin-right: 10px;width: 300px;}
 .round-button {background-color: green;color: white;border: none;border-radius: 50%;padding: 10px 20px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;cursor: pointer;}
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+input[type = "submit"] {background-color: green;color: #ffffff;padding: 10px 20px;border: none;border-radius: 15px;cursor: pointer;align-items: center;}
 
 </style>
 </head>
@@ -97,36 +83,67 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
 
   <!-- Header -->
   <div class="w3-container" style="margin-top:20px" id="showcase">
-    <h1 class="w3-jumbo"><b>Add new student </b></h1>
+    <h1 class="w3-jumbo"><b>Homework </b></h1>
     <hr style="width:120px;border:5px solid red" class="w3-round">
   </div>
 <br>
  
   <div>
-    <h3><b>Student's information</b></h3>
-    <br><br>
-    <form action="add_student.php" method="POST">
-        <label for="username">Username:</label><br>
-        <input type="text" id="username" name="username" required><br>
+  <h3><b>Homework Table</b></h3>
+    <br>
+    <?php  if ($role == 'Teacher'):// only teacher can add student ?>
+        <input  type="submit" value="Add new homework" name="add" onclick="window.location.href ='add_homework.php'"><br>            
+    <?php endif; ?>
 
-        <p>Role: Student </p>
+    <br>
+    <table>
+        <tr>
+            <th>Tittle</th> 
+            <th>Due date</th> 
+            <th>Action</th>     
+        </tr>
+        <?php
+            connect_db();
+            $result = get_all_homework();
+            disconnect_db();
+        ?>
+            <?php while ($row = mysqli_fetch_assoc($result))://print all users and use javascript to send the clicked student to next page ?>   
+            
+        <tr>
+            <td> <?php echo $row['tittle'] ?></td>
+            <td> <?php echo $row['date'] ?></td>
+            <td>
+                    <form action="view_homework.php" method="POST">
+                        <input type="hidden" name="homework_id" value="<?php echo $row['homework_id']; ?>">
+                    <button  type="submit"> View </button> 
+                    </form>
+                <?php  if ($role == 'Teacher'):// only teacher can edit student but not other teacher?>
+                    <form action="edit_homework.php" method="POST">
+                    <input type="hidden" name="edit_id" value="<?php echo $row['homework_id']; ?>"> 
+                    <button  type="submit" onclick="window.location.href ='edit_student.php'">  Edit </button> 
+                    </form>
+                    
+                    <form action="delete_homework.php" method="POST">
+                        <input type="hidden" name="delete_id" value="<?php echo $row['homework_id']; ?>">
+                    <button  type="submit">Delete</button> 
+                    </form>
+                <?php endif; ?>
 
-        <label for="password">Password:</label><br>
-        <input type="password" id="password" name="password" required><br>
+                <?php  if ($role == 'Student'):// only student can upload their solutions ?>
+                    <form action="upload_solution.php" method="POST">
+                    <input type="hidden" name="homework_id" value="<?php echo $row['homework_id']; ?>"> 
+                    <button  type="submit" onclick="window.location.href ='edit_student.php'">Upload solution</button> 
+                    </form>
+                    
+                   
+                <?php endif; ?>
+            </td>
+            
+        </tr>
+        <?php endwhile; ?>
 
-        <label for="fullname">Full name</label>:</label><br>
-        <input type="text" id="fullname" name="fullname" required><br>
-
-        <label for="email">Email:</label><br>
-        <input type="email" id="email" name="email" required><br>
-
-        <label for="phone">Phone number:</label><br>
-        <input type="text" id="phone" name="phone" required>
-        <br><br>
-        <input  type="submit" value="Add" name="add"><br>
-    </form>
-   
-
+        
+    </table>
   </div>
   
 <!-- End page content -->
@@ -139,26 +156,6 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
 </footer>
 
 
-<script>
-// Script to open and close sidebar
-function w3_open() {
-  document.getElementById("mySidebar").style.display = "block";
-  document.getElementById("myOverlay").style.display = "block";
-}
- 
-function w3_close() {
-  document.getElementById("mySidebar").style.display = "none";
-  document.getElementById("myOverlay").style.display = "none";
-}
-
-// Modal Image Gallery
-function onClick(element) {
-  document.getElementById("img01").src = element.src;
-  document.getElementById("modal01").style.display = "block";
-  var captionText = document.getElementById("caption");
-  captionText.innerHTML = element.alt;
-}
-</script>
 
 </body>
 </html>

@@ -1,89 +1,29 @@
 <?php
   session_start();
   include("function.php");
-  if (!isset($_SESSION['user_id']) ) {
+  if (!isset($_SESSION['user_id']) || !isset($_POST['homework_id'])) {
     // Redirect to the login page or deny access if not authorized
     header('Location: login.php');
     exit;
   }
-  if (!isset($_SESSION['role']) ||  $_SESSION['role'] == 'Student'){
-    header('Location: home.php');
-    exit;
-  }
+  $homework_id = $_POST['homework_id'];
   connect_db();
-  // get current user's username and role
+   // get current user's username and role
   $temp = get_information($_SESSION['user_id']);
   $user_username = $temp['username'];
   $user_role = ($temp['role'] == 1)? 'Teacher':'Student';
-
+   // get search homework information
+  $row = get_homework_information($homework_id);
+  $tittle = $row['tittle'];
+  $description = $row['description'];
+  $filename = $row['file_name'];
+  $date = $row['date'];
+  $submission = $row['current_submission'];
   
-  if (isset($_POST['edit_id'])){
-    
-    $student_id = $_POST['edit_id'];
-    $_SESSION['edit_student_id'] = $student_id;
-    
 
-    
-    // get search user information
-    $row = get_information($student_id);
-    $student_username = $row['username'];
-    
-
-    if ($row['role'] == 1){
-      $role = "Teacher";
-    }
-    else {
-      $role = "Student";
-    }
-    // initial value
-    $password = $row['password'];
-    $fullname = $row['full_name'];
-    $email = $row['email'];
-    $phone = $row['phone_num'];
-  }
-    
-  if (isset($_POST['edit'])) {
-      $student_id= $_SESSION['edit_student_id'];
-          // get search user information
-      $row = get_information($student_id);
-      $student_username = $row['username'];
-    
-
-      if ($row['role'] == 1){
-        $role = "Teacher";
-      }
-      else {
-        $role = "Student";
-      }
-      // initial value
-      $password = $row['password'];
-      $fullname = $row['full_name'];
-      $email = $row['email'];
-      $phone = $row['phone_num'];
-      if (! email_validation($_POST['new_email'])){
-          die("Invalid email !");
-      }
-      if (! number_validation($_POST['new_phone'])){
-          die("Phone number must contain only number 0-9 and length must be less or equal to 10!");
-      }
-      // changed value 
-      $new_email = $_POST['new_email'];
-      $new_phone = $_POST['new_phone']; 
-
-      if (update_record($password,$new_email,$new_phone,$student_id)){
-        echo "Update success";
-      }  
-      else{
-        echo "No";
-      }  
-      disconnect_db();
-      header("location: view.php");
-    }
-
-
+  disconnect_db();
   
-  
- 
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -128,45 +68,66 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
 
   <!-- Header -->
   <div class="w3-container" style="margin-top:20px" id="showcase">
-    <h1 class="w3-jumbo"><b>Edit student information</b></h1>
+    <h1 class="w3-jumbo"><b>View homework</b></h1>
     <hr style="width:120px;border:5px solid red" class="w3-round">
   </div>
 <br>
  
   <div>
-    <h3 ><span><b>Information of </b></span><span class="w3-xxxlarge w3-text-red"><b><?php echo $fullname; ?></b></span> </h3>
+    <h3 ><span><b>Homework details</b></span> </h3>
     <br><br>
-    <form action="edit_student.php" method="POST">
+   
         <ul>
             <li>
-                <span>Username:</span>
-                <span>***************</span>
+                <span>Tittle:</span>
+                <span><?php echo htmlspecialchars($tittle); ?></span>
             </li>
             <li>
-                <span>Password:</span>
-                <span>***************</span>
+                <span>Description:</span>
+                <span><?php echo htmlspecialchars($description); ?></span>
             </li>
+            <li>
+                <span>Due date:</span>
+                <span><?php echo htmlspecialchars($date); ?></span>
+            </li>
+            <li>
+                <span>File:</span>
+                <span>
+                <?php 
+                $directory = 'uploads/homework';
+                try{
+                    // Scan the directory and get the list of files
+                    $files = scandir($directory);
+                    
+                    // Iterate through the files
+                    foreach ($files as $file) {
+                     
+                        if ($file !== '.' && $file !== '..') {
+                            // Check if the entered file name matches the current file
+                            if ($file === basename($filename)) {
+                                // Provide a download link to the user
+                                $filePath = $directory . '/' . $file;
+                                echo '<a href="' . $filePath . '" download>' . $file . '</a><br>';
+                            }
+                        }
+                    }
+                }
+                catch (Exception $e){
+                    echo "<script>alert('No matching file found')</script>";
 
-            <li>
-                <span>Full name:</span>
-                <span><?php echo $fullname; ?></span>
+                }
+                ?></span>
             </li>
-            <li>
-                <span>Role:</span>
-                <span><?php echo $role; ?></span>
-            </li>
-            <li>
-                <span>Email:</span>
-                <span><input type="text" name="new_email" value="<?php echo $email; ?>"></span>
-            </li>
-            <li>
-                <span>Phone Number:</span>
-                <span><input type="text" name="new_phone" value="<?php echo $phone; ?>"></span>
-            </li>
+            <?php  if ($user_role == 'Teacher'):// only teacher can see?>
+                <li>
+                        <span>Current number of submission:</span>
+                        <span><?php echo $submission; ?></span>
+                </li>
+            <?php endif; ?>
         </ul>
-        <input type="submit" name="edit" value="Update">
+   
 
-    </form>
+
   </div>
   
 <!-- End page content -->
@@ -179,7 +140,11 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
 </footer>
 
 
+<script>
 
+
+
+</script>
 
 </body>
 </html>

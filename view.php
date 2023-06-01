@@ -50,6 +50,7 @@ td, th {
 tr:nth-child(even) {
   background-color: #dddddd;
 }
+input[type = "submit"] {background-color: green;color: #ffffff;padding: 10px 20px;border: none;border-radius: 15px;cursor: pointer;align-items: center;}
 
 </style>
 </head>
@@ -85,7 +86,12 @@ tr:nth-child(even) {
  
   <div>
     <h3><b>User Table</b></h3>
-    <br><br>
+    <br>
+    <?php  if ($role == 'Teacher'):// only teacher can add student ?>
+        <input  type="submit" value="Add new student" name="add" onclick="window.location.href ='add_student.php'"><br>            
+    <?php endif; ?>
+
+    <br>
     <table>
         <tr>
             <th>Full name</th> 
@@ -111,10 +117,14 @@ tr:nth-child(even) {
                     </form>
                 <?php  if ($role == 'Teacher' && $row['role'] == 'Student'):// only teacher can edit student but not other teacher?>
                     <form action="edit_student.php" method="POST">
-                        <input type="hidden" name="edit_id" value="<?php $_SESSION['edit_id'] = $row['user_id']; ?>">
-                    <button  type="submit"> Edit </button> 
+                    <input type="hidden" name="edit_id" value="<?php echo $row['user_id']; ?>"> 
+                    <button  type="submit" onclick="window.location.href ='edit_student.php'">  Edit </button> 
                     </form>
-                
+                    
+                    <form action="delete_student.php" method="POST">
+                        <input type="hidden" name="delete_id" value="<?php echo $row['user_id']; ?>">
+                    <button  type="submit">Delete</button> 
+                    </form>
                 <?php endif; ?>
 
             </td>
@@ -136,31 +146,7 @@ tr:nth-child(even) {
 </footer>
 
 
-<script>
-// Script to open and close sidebar
-function w3_open() {
-  document.getElementById("mySidebar").style.display = "block";
-  document.getElementById("myOverlay").style.display = "block";
-}
- 
-function w3_close() {
-  document.getElementById("mySidebar").style.display = "none";
-  document.getElementById("myOverlay").style.display = "none";
-}
 
-function redirectToEdit() {
-        // Redirect to the desired page
-        window.location.href = "edit_student.php";
-    }
-
-// Edit student
-function editStudent(username) {
-        // Perform desired actions with the student ID
-        // You can send the student ID to the server via AJAX for further processing
-        console.log("Edit student with username: " + username);
-        // Additional logic can be added here, such as redirecting to an edit page
-    }
-</script>
 
 </body>
 </html>
