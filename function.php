@@ -1,7 +1,24 @@
 <?php
 
+
 global $conn;
 global $student_id;
+// ============= ERROR HANDLING ===================
+function customErrorHandler($severity, $message, $file, $line) {
+    // Handle the error or log it
+    // You can redirect to an error page or display a custom error message
+    // instead of showing the actual error details to the user
+    header("Location: error_page.php");
+    exit;
+}
+
+// Set the custom error handler
+set_error_handler("customErrorHandler");
+
+
+
+// ============= DB ===================
+
 function connect_db() {
     global $conn;
     $conn = mysqli_connect("localhost", "root", "", "codeandpunch");
@@ -51,37 +68,48 @@ function check_parameter(...$agrs){  // check if all the para not null
 
 function update_record($password,$email,$phone,$id){
     global $conn;
-    $query = "UPDATE information 
-    SET password = ?, email = ?, phone_num = ?   
-    WHERE user_id = ?;";
-    $preparedStatement = $conn->prepare($query);
-    $preparedStatement->bind_param('sssi',$password,$email,$phone,$id);
-    if ($preparedStatement->execute()){
-        return true;
+    try{
+        $query = "UPDATE information 
+        SET password = ?, email = ?, phone_num = ?   
+        WHERE user_id = ?;";
+        $preparedStatement = $conn->prepare($query);
+        $preparedStatement->bind_param('sssi',$password,$email,$phone,$id);
+        if ($preparedStatement->execute()){
+            return true;
+        }
+        return false;
     }
-    return false;
+    catch(Exception $e){
+        echo "update failed";
+    }
 }
 function add_record($username,$password,$role,$fullname,$email,$phone){
     global $conn;
-    if ($role == 'teacher'){
-        $role = 1 ;
+    try{
+        if ($role == 'teacher'){
+            $role = 1 ;
+        }
+        else {
+            $role = 0;
+        }
+        $password = hash('sha256', $password);
+        $query = "INSERT INTO information (username, role, password, full_name, email, phone_num) VALUES (?,?,?,?,?,?)";
+        $preparedStatement = $conn->prepare($query);
+        $preparedStatement->bind_param('sisssi',$username,$role,$password,$fullname,$email,$phone);
+        if ($preparedStatement->execute()){
+            return true;
+        }
+        return false;
     }
-    else {
-        $role = 0;
+    catch(Exception $e){
+        echo "Add failed";
     }
-    $password = hash('sha256', $password);
-    $query = "INSERT INTO information (username, role, password, full_name, email, phone_num) VALUES (?,?,?,?,?,?)";
-    $preparedStatement = $conn->prepare($query);
-    $preparedStatement->bind_param('sisssi',$username,$role,$password,$fullname,$email,$phone);
-    if ($preparedStatement->execute()){
-        return true;
-    }
-    return false;
     
 }
 
 function check_login($username,$password){
     global $conn;
+   try{
     $_SESSION['password'] = $password;
     $password = hash('sha256', $password);
     $query = "SELECT * FROM information WHERE username = ? AND password = ?";
@@ -101,6 +129,10 @@ function check_login($username,$password){
         return true; 
         
     } 
+   }
+   catch (Exception $e){
+    echo "Login failed";
+   }
 }
 function get_information($id){
     global $conn;
@@ -128,13 +160,18 @@ function get_information($id){
 
 function delete_record($id){
     global $conn;
-    $query = "DELETE FROM `information` WHERE user_id = ?";
-    $preparedStatement = $conn->prepare($query);
-    $preparedStatement->bind_param('i',$id);
-    if ($preparedStatement->execute()){
-        return true;
+    try{
+        $query = "DELETE FROM `information` WHERE user_id = ?";
+        $preparedStatement = $conn->prepare($query);
+        $preparedStatement->bind_param('i',$id);
+        if ($preparedStatement->execute()){
+            return true;
+        }
+        return false;
     }
-    return false;
+    catch(Exception $e){
+        echo ("Delete failed !");
+    }
 }
 
 
@@ -155,8 +192,48 @@ function check_dupl_username($str){  // return true if username duplicated, fals
     return false;
 
 }
+function update_submission($homework_id,$count){
+    global $conn;
+    try{
+        $query = "UPDATE homework 
+        SET current_submission = ?  
+        WHERE homework_id = ?;";
+        $preparedStatement = $conn->prepare($query);
+        $preparedStatement->bind_param('ii',$count,$homework_id,);
+        if ($preparedStatement->execute()){
+            return true;
+        }
+        return false;
+    }
+    catch(Exception $e){
+        echo "Update submission failed !"; 
+     }
+}
+function count_submission($homework_id){
+    
+    global $conn;
+    try{
+         $query = "SELECT COUNT(*) FROM `student_homework` WHERE `homework_id` = ?";
+         $preparedStatement = $conn->prepare($query);
+         $preparedStatement->bind_param('i',$homework_id);
+         $preparedStatement->execute();
+         $result = $preparedStatement->get_result();
+         if (mysqli_num_rows($result) <= 0) {
+        $message = "No result found !";
+        echo "<script type='text/javascript'>alert('$message');</script>";
+        
+    } else {
+        
+        $row = $result->fetch_assoc();
+        return $row['COUNT(*)'];
+}
+    }
+     catch(Exception $e){
+         echo "Count submission failed !"; 
+      }
+}
 
-// homework
+// ======================= HOMEWORK ===============================================
 function get_all_homework(){
     global $conn;
     $query = "SELECT * FROM homework";
@@ -189,48 +266,99 @@ function get_homework_information($id){
 }
 function add_homework($tittle, $description, $file_name, $date){
     global $conn;
-    $current_submission = 0;
-    $query = "INSERT INTO homework (tittle, description, file_name, date, current_submission) VALUES (?,?,?,?,?)";
-    $preparedStatement = $conn->prepare($query);
-    $preparedStatement->bind_param('ssssi',$tittle, $description, $file_name, $date,$current_submission);
-    if ($preparedStatement->execute()){
-        return true;
-    }
-    return false;
-    
+   try{
+        $current_submission = 0;
+        $query = "INSERT INTO homework (tittle, description, file_name, date, current_submission) VALUES (?,?,?,?,?)";
+        $preparedStatement = $conn->prepare($query);
+        $preparedStatement->bind_param('ssssi',$tittle, $description, $file_name, $date,$current_submission);
+        if ($preparedStatement->execute()){
+            return true;
+        }
+        return false;
+   }
+    catch(Exception $e){
+        echo "Add homework failed !"; 
+     }
 }
 
 function update_homework($homework_id ,$tittle, $description, $file_name, $date){
     global $conn;
-    $query = "UPDATE homework 
-    SET tittle = ?, description = ?, file_name = ? , date = ?  
-    WHERE homework_id = ?;";
-    $preparedStatement = $conn->prepare($query);
-    $preparedStatement->bind_param('ssssii',$tittle, $description, $file_name, $date,$homework_id);
-    if ($preparedStatement->execute()){
-        return true;
+    try{
+        $query = "UPDATE homework 
+        SET tittle = ?, description = ?, file_name = ? , date = ?  
+        WHERE homework_id = ?;";
+        $preparedStatement = $conn->prepare($query);
+        $preparedStatement->bind_param('ssssii',$tittle, $description, $file_name, $date,$homework_id);
+        if ($preparedStatement->execute()){
+            return true;
+        }
+        return false;
     }
-    return false;
+    catch(Exception $e){
+        echo "Update homework failed !"; 
+     }
 }
+
 function delete_homework($homework_id){
     global $conn;
-    $query = "DELETE FROM `homework` WHERE homework_id = ?";
-    $preparedStatement = $conn->prepare($query);
-    $preparedStatement->bind_param('i',$homework_id);
-    if ($preparedStatement->execute()){
-        return true;
+    try{
+        $query = "DELETE FROM `homework` WHERE homework_id = ?";
+        $preparedStatement = $conn->prepare($query);
+        $preparedStatement->bind_param('i',$homework_id);
+        if ($preparedStatement->execute()){
+            return true;
+        }
+        return false;
     }
-    return false;
+    catch(Exception $e){
+        echo "Delete homework failed !"; 
+     }
 }
-// FILE
 
-function validateFile()
+// ======================= Student uploads ===============================================
+
+function add_solution ($student_id, $homework_id,$file_name){
+    global $conn;
+    try {
+        $query = "INSERT INTO student_homework () VALUES (?,?,?)";
+        $preparedStatement = $conn->prepare($query);
+        $preparedStatement->bind_param('iis',$student_id, $homework_id,$file_name);
+        if ($preparedStatement->execute()){
+            return true;
+        }
+        return false;
+    }
+    catch(Exception $e){
+       echo "Add solution failed !"; 
+    }
+}
+
+
+
+// ======================= FILE ===============================================
+
+function sanitizeFileName($filename) {
+    $filename = trim($filename); // delete leading and trailing spaces
+    if (strpos($filename, '.') === 0) {   // if the file starts with '.' then remove it 
+        $filename = substr($filename, 1);
+    }
+
+    $extensions = explode('.', $filename);  // delete all the found extension. only allow 1 first extension
+    if (count($extensions) > 2) {
+        $filename = implode('.', array_slice($extensions, 0, 2));
+    }
+    $pattern = '/[^A-Za-z0-9_.-]/';  // remove all the non letters,numbers,underscore,dot,hyphen
+    $filename= preg_replace($pattern, '', $filename);
+    return $filename;
+}
+
+function validateFile($var_name)
 {
     $allowedMimeTypes = ['text/plain','application/msword','application/pdf'];
     $allowedExtensions = ['txt','doc','pdf'];
     $maxFileSize = 170000;
 
-    $file = $_FILES['file_name'];
+    $file = $_FILES[$var_name];
     $tempFile = $file['tmp_name'];
 
     // Check if file was uploaded successfully
@@ -265,29 +393,26 @@ function validateFile()
     return true;
 }
 
-function uploadFile($targetDir)
+function uploadFile($targetDir,$var_name)
 {
-    if ($_FILES['file_name']['name'] != "") {
+    if ($_FILES[$var_name]['name'] != "") {
         // Where the file is going to be stored
-        $fileName = $_FILES['file_name']['name'];
-        $tempFile = $_FILES['file_name']['tmp_name'];
-        $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $fileName = $_FILES[$var_name]['name'];
+        $tempFile = $_FILES[$var_name]['tmp_name'];
         
         // Sanitized file name
         $temp = basename($fileName);
-        $pattern = '/[^A-Za-z0-9_.-]/';
-        $sanitizedFileName = preg_replace($pattern, '', $temp);
-
+        $sanitizedFilename = sanitizeFileName($temp);
         // Generate a unique file name
 	  
-        $uniqueName = uniqid() . '_' . $sanitizedFileName;
+        $uniqueName = uniqid() . '_' . $sanitizedFilename;
         $targetFile = $targetDir . $uniqueName;
 
         // Check if file already exists
         if (file_exists($targetFile)) {
             echo "<script>alert('Sorry, a file with the same name already exists.')</script>";
             return null;
-        } elseif (!validateFile()) {
+        } elseif (!validateFile($var_name)) {
             echo "<script>alert('Invalid file.')</script>";
             return null; 
         } else {

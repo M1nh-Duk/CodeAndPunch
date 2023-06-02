@@ -10,6 +10,14 @@
     header('Location: home.php');
     exit;
   }
+  session_regenerate_id(true);
+  setcookie(session_name(), session_id(), [
+    'httponly' => true,
+    'expires' => 0,
+    'path' => '/',
+    'secure' => false,
+    'samesite' => 'Lax'
+]);
   connect_db();
   $row = get_information($_SESSION['user_id']);
   $username = $row['username'];
@@ -34,12 +42,12 @@
     }
     
     
-    $filename = uploadFile("uploads/homework/");
+    $filename = uploadFile("uploads/homework/","file_name");
     if ($filename == null){
         die ("Please upload valid file");
     }
     // add homework to db 
-    add_homework($_POST['tittle'],$_POST['description'],$filename,$date);
+    add_homework(htmlspecialchars($_POST['tittle']),htmlspecialchars($_POST['description']),$filename,$date);
     disconnect_db();
     header('location:homework.php');
 }
@@ -77,8 +85,8 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
     <a href="home.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Home</a> 
     <a href="edit.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Edit information</a>
     <a href="view.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">View user</a> 
-    <a href="#" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Homework</a> 
-    <a href="#" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Game</a>
+    <a href="homework.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Homework</a> 
+    <a href="game.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Game</a>
     <br><br><br><br><br><br><br><br>
     <a href="logout.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Sign Out</a> 
 
@@ -104,7 +112,7 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
 
 
         <label for="description">Description:</label><br>
-        <textarea name="description" rows="3" cols="20"></textarea>
+        <textarea name="description" rows="5" cols="50"></textarea>
 
         <br>
         <label for="date">Due date</label>:</label><br>
@@ -112,7 +120,7 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
 
         <label for="file_name">File:</label></label><br>
         <input type="file" name="file_name" required>
-
+        
         <br><br><br>
         <input type="submit" name="add_homework">
     </form>

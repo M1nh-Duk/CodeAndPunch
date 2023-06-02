@@ -6,7 +6,14 @@
     header('Location: login.php');
     exit;
   }
-  $homework_id = $_POST['homework_id'];
+  session_regenerate_id(true);
+  setcookie(session_name(), session_id(), [
+    'httponly' => true,
+    'expires' => 0,
+    'path' => '/',
+    'secure' => false,
+    'samesite' => 'Lax'
+]);  $homework_id = $_POST['homework_id'];
   connect_db();
    // get current user's username and role
   $temp = get_information($_SESSION['user_id']);
@@ -14,12 +21,12 @@
   $user_role = ($temp['role'] == 1)? 'Teacher':'Student';
    // get search homework information
   $row = get_homework_information($homework_id);
-  $tittle = $row['tittle'];
-  $description = $row['description'];
+  $tittle = htmlspecialchars_decode($row['tittle']);
+  $description = htmlspecialchars_decode($row['description']);
   $filename = $row['file_name'];
   $date = $row['date'];
   $submission = $row['current_submission'];
-  
+  $_SESSION['upload_homework_id'] = $homework_id;
 
   disconnect_db();
   
@@ -52,11 +59,11 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
     <h3 class="w3-padding-64"><b>Username: <?php echo $user_username; ?><br>Role: <?php echo $user_role; ?></b></h3>
   </div>
   <div class="w3-bar-block">
-  <a href="home.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Home</a> 
+    <a href="home.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Home</a> 
     <a href="edit.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Edit information</a>
     <a href="view.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">View user</a> 
-    <a href="#" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Homework</a> 
-    <a href="#" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Game</a>
+    <a href="homework.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Homework</a> 
+    <a href="game.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Game</a>
     <br><br><br><br><br><br><br><br>
     <a href="logout.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Sign Out</a> 
 
@@ -95,7 +102,7 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
                 <span>
                 <?php 
                 $directory = 'uploads/homework';
-                try{
+                try{  // get a file 
                     // Scan the directory and get the list of files
                     $files = scandir($directory);
                     
@@ -123,10 +130,22 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
                         <span>Current number of submission:</span>
                         <span><?php echo $submission; ?></span>
                 </li>
+            <?php else: ?>
+                <li>
+                        <span>Upload solution:</span>
+                        <span>
+                          <br>
+                          <form action="add_student_upload.php" method="POST" enctype="multipart/form-data">
+                            <input type="file" name="upload_solution" required>
+                            
+                            <br><br><br>
+                            <input type="submit" name="add_solution">
+                          </form>
+                        </span>
+                </li>
             <?php endif; ?>
         </ul>
-   
-
+        
 
   </div>
   

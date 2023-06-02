@@ -1,41 +1,27 @@
 <?php
   session_start();
   include("function.php");
-  if (!isset($_SESSION['user_id']) && $_POST['view_id']) {
+  if (! isset($_SESSION['user_id'])) {
     // Redirect to the login page or deny access if not authorized
     header('Location: login.php');
     exit;
   }
-  session_regenerate_id(true);
-  setcookie(session_name(), session_id(), [
-    'httponly' => true,
-    'expires' => 0,
-    'path' => '/',
-    'secure' => false,
-    'samesite' => 'Lax'
-]);  $view_id = $_POST['view_id'];
   connect_db();
-   // get current user's username and role
-  $temp = get_information($_SESSION['user_id']);
-  $user_username = $temp['username'];
-  $user_role = ($temp['role'] == 1)? 'Teacher':'Student';
-   // get search user information
-  $row = get_information($view_id);
-  $student_username = $row['username'];
+  $row = get_information($_SESSION['user_id']);
+  $username = $row['username'];
   if ($row['role'] == 1){
       $role = "Teacher";
   }
   else {
       $role = "Student";
   }
+  $_SESSION['role'] = $role;
   $fullname = $row['full_name'];
   $email = $row['email'];
   $phone = $row['phone_num'];
 
   disconnect_db();
-  
-
-?>
+  ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -52,6 +38,8 @@ body {font-size:16px;}
 ul {list-style: none;padding: 0;margin: 0;}
 li {display: flex;align-items: center;margin-bottom: 50px;}
 li span{font-weight: bold;margin-right: 10px;width: 300px;}
+.round-button {background-color: green;color: white;border: none;border-radius: 50%;padding: 10px 20px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;cursor: pointer;}
+
 </style>
 </head>
 <body>
@@ -60,7 +48,7 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
 <nav class="w3-sidebar w3-red w3-collapse w3-top w3-large w3-padding" style="z-index:3;width:300px;font-weight:bold;" id="mySidebar"><br>
   <a href="javascript:void(0)" onclick="w3_close()" class="w3-button w3-hide-large w3-display-topleft" style="width:100%;font-size:22px">Close Menu</a>
   <div class="w3-container">
-    <h3 class="w3-padding-64"><b>Username: <?php echo $user_username; ?><br>Role: <?php echo $user_role; ?></b></h3>
+    <h3 class="w3-padding-64"><b>Username: <?php echo $username; ?><br>Role: <?php echo $role; ?></b></h3>
   </div>
   <div class="w3-bar-block">
     <a href="home.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Home</a> 
@@ -79,50 +67,13 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
 
   <!-- Header -->
   <div class="w3-container" style="margin-top:20px" id="showcase">
-    <h1 class="w3-jumbo"><b>View user information</b></h1>
+    <h1 class="w3-jumbo"><b>Coming soon ...</b></h1>
+    
     <hr style="width:120px;border:5px solid red" class="w3-round">
   </div>
 <br>
  
-  <div>
-    <h3 ><span><b>Information of </b></span><span class="w3-xxxlarge w3-text-red"><b><?php echo $fullname; ?></b></span> </h3>
-    <br><br>
-   
-        <ul>
-            <li>
-                <span>Username:</span>
-                <span>***************</span>
-            </li>
-            <li>
-                <span>Password:</span>
-                <span>***************</span>
-            </li>
-
-            <li>
-                <span>Full name:</span>
-                <span><?php echo htmlspecialchars($fullname); ?></span>
-            </li>
-            <li>
-                <span>Role:</span>
-                <span><?php echo $role; ?></span>
-            </li>
-            <li>
-                <span>Email:</span>
-                <span><?php echo htmlspecialchars($email); ?></span>
-            </li>
-            <li>
-                <span>Phone Number:</span>
-                <span><?php echo $phone; ?></span>
-            </li>
-        </ul>
-   
-
-
-  </div>
   
-<!-- End page content -->
-</div>
-
 
 <!-- Footer -->
 <footer>
@@ -130,11 +81,7 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
 </footer>
 
 
-<script>
 
-
-
-</script>
 
 </body>
 </html>

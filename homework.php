@@ -6,7 +6,14 @@
     header('Location: login.php');
     exit;
   }
-  connect_db();
+  session_regenerate_id(true);
+  setcookie(session_name(), session_id(), [
+    'httponly' => true,
+    'expires' => 0,
+    'path' => '/',
+    'secure' => false,
+    'samesite' => 'Lax'
+]);  connect_db();
   $row = get_information($_SESSION['user_id']);
   $username = $row['username'];
   if ($row['role'] == 1){
@@ -70,8 +77,8 @@ input[type = "submit"] {background-color: green;color: #ffffff;padding: 10px 20p
     <a href="home.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Home</a> 
     <a href="edit.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Edit information</a>
     <a href="view.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">View user</a> 
-    <a href="#" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Homework</a> 
-    <a href="#" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Game</a>
+    <a href="homework.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Homework</a> 
+    <a href="game.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Game</a>
     <br><br><br><br><br><br><br><br>
     <a href="logout.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Sign Out</a> 
 
@@ -115,7 +122,7 @@ input[type = "submit"] {background-color: green;color: #ffffff;padding: 10px 20p
             <td>
                     <form action="view_homework.php" method="POST">
                         <input type="hidden" name="homework_id" value="<?php echo $row['homework_id']; ?>">
-                    <button  type="submit"> View </button> 
+                    <button  type="submit"> Details </button> 
                     </form>
                 <?php  if ($role == 'Teacher'):// only teacher can edit student but not other teacher?>
                     <form action="edit_homework.php" method="POST">
@@ -129,14 +136,6 @@ input[type = "submit"] {background-color: green;color: #ffffff;padding: 10px 20p
                     </form>
                 <?php endif; ?>
 
-                <?php  if ($role == 'Student'):// only student can upload their solutions ?>
-                    <form action="upload_solution.php" method="POST">
-                    <input type="hidden" name="homework_id" value="<?php echo $row['homework_id']; ?>"> 
-                    <button  type="submit" onclick="window.location.href ='edit_student.php'">Upload solution</button> 
-                    </form>
-                    
-                   
-                <?php endif; ?>
             </td>
             
         </tr>

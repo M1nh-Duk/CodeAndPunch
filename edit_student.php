@@ -10,7 +10,14 @@
     header('Location: home.php');
     exit;
   }
-  connect_db();
+  session_regenerate_id(true);
+  setcookie(session_name(), session_id(), [
+    'httponly' => true,
+    'expires' => 0,
+    'path' => '/',
+    'secure' => false,
+    'samesite' => 'Lax'
+]);  connect_db();
   // get current user's username and role
   $temp = get_information($_SESSION['user_id']);
   $user_username = $temp['username'];
@@ -112,11 +119,11 @@ li span{font-weight: bold;margin-right: 10px;width: 300px;}
     <h3 class="w3-padding-64"><b>Username: <?php echo $user_username; ?><br>Role: <?php echo $user_role; ?></b></h3>
   </div>
   <div class="w3-bar-block">
-  <a href="home.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Home</a> 
+    <a href="home.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Home</a> 
     <a href="edit.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Edit information</a>
     <a href="view.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">View user</a> 
-    <a href="#" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Homework</a> 
-    <a href="#" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Game</a>
+    <a href="homework.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Homework</a> 
+    <a href="game.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Game</a>
     <br><br><br><br><br><br><br><br>
     <a href="logout.php" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Sign Out</a> 
 

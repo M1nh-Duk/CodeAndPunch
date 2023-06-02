@@ -5,7 +5,14 @@
         header('Location: home.php');
         exit;
     }
-    connect_db();
+    session_regenerate_id(true);
+    setcookie(session_name(), session_id(), [
+        'httponly' => true,
+        'expires' => 0,
+        'path' => '/',
+        'secure' => false,
+        'samesite' => 'Lax'
+    ]);    connect_db();
    
     // delete file in physical folder
 
