@@ -10,7 +10,7 @@ email nvarchar(100),
 phone_num varchar(10));
 
 INSERT INTO information ()
-VALUES 
+VALUES
 (1,N'Ak3tsuk1_0biw1ns', 1, 'cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90', N'Phạm Việt Thắng', 'thangpvhayluanguoi@gmail.com', '0987123456'),
 (2,'EHC_NguyenHoangQuan', 0, 'bc502a15547fd68c71ac8643b27b2124a7f9faa66e3bfd2d2b99d40468e4eafd', N'Nguyễn Hoàng Quân', 'quannhuytinvl@gmail.com', '0999888999'),
 (3,'d3ckk_no0b', 1, 'cabf92a325311830230d8bb4acc712fcf09380a35be871f0d2ccf92add5e9da8', N'Nguyễn Văn Đức', 'ducnvbcm@gmail.com', '0999999999'),
@@ -24,11 +24,9 @@ VALUES
 
 
 
-CREATE TABLE `codeandpunch`.`homework` (`homework_id` INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT , `tittle` NVARCHAR(255) ,`description` NVARCHAR(255) ,`file_name` NVARCHAR(20) ,  `date` DATE , `current_submission` INT(11) ) ENGINE = InnoDB;
-INSERT INTO `homework` () 
+CREATE TABLE `codeandpunch`.`homework` (`homework_id` INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT , `tittle` NVARCHAR(255) ,`description` NVARCHAR(512) ,`file_name` NVARCHAR(512) ,  `date` DATE , `current_submission` INT(11) ) ENGINE = InnoDB;
+INSERT INTO `homework` ()
 VALUES ('1', 'First test','This is a first test for you','test.txt',  '2023-05-31', '0')
 
 
 CREATE TABLE `student_homework` (`student_id` INT(11), `homework_id` INT(11), `file_name` NVARCHAR(512)) ENGINE = InnoDB;
-
-
