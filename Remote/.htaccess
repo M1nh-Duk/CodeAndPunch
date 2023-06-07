@@ -1,0 +1,12 @@
+# Disable directory browsing
+Options -Indexes
+
+RewriteEngine On
+# Add extension if not enter extension
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+
+# Set the default page in this dir
+DirectoryIndex login.php
