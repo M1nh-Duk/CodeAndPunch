@@ -24,7 +24,7 @@ VALUES
 
 
 
-CREATE TABLE `codeandpunch`.`homework` (`homework_id` INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT , `tittle` NVARCHAR(255) ,`description` NVARCHAR(512) ,`file_name` NVARCHAR(512) ,  `date` DATE , `current_submission` INT(11) ) ENGINE = InnoDB;
+CREATE TABLE `homework` (`homework_id` INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT , `tittle` NVARCHAR(255) ,`description` NVARCHAR(512) ,`file_name` NVARCHAR(512) ,  `date` DATE , `current_submission` INT(11) ) ENGINE = InnoDB;
 INSERT INTO `homework` ()
 VALUES ('1', 'First test','This is a first test for you','test.txt',  '2023-05-31', '0')
 
