@@ -15,7 +15,7 @@
     'samesite' => 'Lax'
 ]);
   connect_db();
-  $row = get_information($_SESSION['user_id']);
+  $row = get_information($_SESSION['user_id']); //
   $username = $row['username'];
   if ($row['role'] == 1){
       $role = "Teacher";
