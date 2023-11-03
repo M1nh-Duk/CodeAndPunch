@@ -137,7 +137,7 @@ function check_login($username,$password){
 function get_information($id){
     global $conn;
     $query = "SELECT * FROM information WHERE user_id = ?";
-    try{
+    try {
         $preparedStatement = $conn->prepare($query);
         $preparedStatement->bind_param('i',$id);
         $preparedStatement->execute();
